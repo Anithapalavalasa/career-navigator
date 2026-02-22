@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { insertRegistrationSchema, registrations } from './schema';
+import { z } from "zod";
+import { insertRegistrationSchema, registrations } from "./schema";
 
 export const errorSchemas = {
   validation: z.object({
@@ -17,8 +17,8 @@ export const errorSchemas = {
 export const api = {
   admin: {
     login: {
-      method: 'POST' as const,
-      path: '/api/admin/login' as const,
+      method: "POST" as const,
+      path: "/api/admin/login" as const,
       input: z.object({ username: z.string(), password: z.string() }),
       responses: {
         200: z.object({ success: z.boolean() }),
@@ -28,8 +28,8 @@ export const api = {
   },
   registrations: {
     create: {
-      method: 'POST' as const,
-      path: '/api/register' as const,
+      method: "POST" as const,
+      path: "/api/register" as const,
       input: insertRegistrationSchema,
       responses: {
         201: z.custom<typeof registrations.$inferSelect>(),
@@ -37,15 +37,15 @@ export const api = {
       },
     },
     list: {
-      method: 'GET' as const,
-      path: '/api/users' as const,
+      method: "GET" as const,
+      path: "/api/users" as const,
       responses: {
         200: z.array(z.custom<typeof registrations.$inferSelect>()),
       },
     },
     download: {
-      method: 'GET' as const,
-      path: '/api/download' as const,
+      method: "GET" as const,
+      path: "/api/download" as const,
       responses: {
         200: z.any(), // Binary Excel file
       },

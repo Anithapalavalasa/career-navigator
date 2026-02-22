@@ -1,5 +1,6 @@
-import { db } from "./db";
 import { registrations, type InsertRegistration, type Registration } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   createRegistration(registration: InsertRegistration): Promise<Registration>;
