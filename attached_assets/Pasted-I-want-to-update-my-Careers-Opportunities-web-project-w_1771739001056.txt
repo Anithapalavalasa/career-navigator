@@ -1,0 +1,44 @@
+I want to **update my "Careers & Opportunities" web project** with the following requirements:
+
+1. **Frontend (HTML, CSS, JS) updates**:
+   - **Professional glassmorphism design** with smooth animations for inputs, buttons, and cards.
+   - **Registration form page**:
+     - **Full Name** (text input)
+     - **Date of Birth** (date picker → automatically fills Age field)
+     - **Age** (auto-calculated from DOB)
+     - **Gender** (radio buttons: Male, Female, Other)
+     - **Passed Year** (text input)
+     - **Status** (radio buttons: Pass, Fail)
+     - **Qualification** (dropdown with options: B.Tech, Diploma, ITI, B.Sc, B.Com, BBM, BBA, MBA-Finance, MBA-Marketing, MCA, M.Tech, B-Pharmacy, M-Pharmacy, D-Pharmacy)
+     - **District** (dropdown with all districts of Andhra Pradesh)
+     - **Caste** (radio buttons: OC, BC, SC, ST)
+     - **Preferred Job Location** (dropdown: Hyderabad, Vizag, Bengaluru, Chennai, Indore, Sricity, Pune)
+     - **Any Certificates** (radio buttons: Yes, No; if Yes, show a text area limited to 250 words)
+
+2. **Form functionality**:
+   - Dropdowns and radio buttons **must render correctly**.
+   - Age should **calculate automatically** based on selected DOB.
+   - If “Any Certificates” = Yes, **display a text area** for user input (250 words max).
+   - All required fields should have **validation**.
+
+3. **Backend updates (Node.js + Express)**:
+   - Store user submissions properly.
+   - Admin dashboard should **fetch and display all submissions in a table**.
+   - Ability to **download all submissions as Excel** using **exceljs** npm package.
+
+4. **Admin dashboard**:
+   - Single admin login (hardcoded credentials)
+   - Table of registered users
+   - Download as Excel button
+
+5. **Styling (CSS)**:
+   - Modern, professional, **glassmorphism cards and inputs**
+   - Smooth hover effects
+   - Responsive design for mobile and desktop
+
+6. **Other requirements**:
+   - The form must now have **all dropdowns and radio buttons correctly applied**
+   - The CSS must look professional, modern, and visually appealing
+   - The project should be **ready to run on Replit** with proper folder structure, backend server, and frontend files
+
+Please generate the **full updated code** (HTML, CSS, JS, Node.js backend) including all dropdowns, radio buttons, and professional glassmorphism CSS.
