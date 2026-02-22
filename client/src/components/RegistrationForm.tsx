@@ -41,7 +41,7 @@ export function RegistrationForm() {
       age: 0,
       gender: "",
       passedYear: "",
-      status: "pending",
+      status: "Pass",
       qualification: "",
       district: "",
       caste: "",
@@ -70,6 +70,24 @@ export function RegistrationForm() {
       }
     });
   };
+
+  const districts = [
+    "Anantapur", "Chittoor", "East Godavari", "Guntur", "Krishna", "Kurnool", 
+    "Prakasam", "Srikakulam", "Sri Potti Sriramulu Nellore", "Visakhapatnam", 
+    "Vizianagaram", "West Godavari", "YSR Kadapa", "Parvathipuram Manyam", 
+    "Alluri Sitharama Raju", "Anakapalli", "Kakinada", "Konaseema", "Eluru", 
+    "NTR", "Bapatla", "Palnadu", "Nandyal", "Sri Sathya Sai", "Annamayya", "Tirupati"
+  ];
+
+  const qualifications = [
+    "B.Tech", "Diploma", "ITI", "B.Sc", "B.Com", "BBM", "BBA", 
+    "MBA-Finance", "MBA-Marketing", "MCA", "M.Tech", 
+    "B-Pharmacy", "M-Pharmacy", "D-Pharmacy"
+  ];
+
+  const locations = [
+    "Hyderabad", "Vizag", "Bengaluru", "Chennai", "Indore", "Sricity", "Pune"
+  ];
 
   if (isSuccess) {
     return (
@@ -114,7 +132,7 @@ export function RegistrationForm() {
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>Full Name *</FormLabel>
                     <FormControl>
                       <Input placeholder="John Doe" className="glass-input" {...field} />
                     </FormControl>
@@ -129,7 +147,7 @@ export function RegistrationForm() {
                   name="dob"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date of Birth</FormLabel>
+                      <FormLabel>Date of Birth *</FormLabel>
                       <FormControl>
                         <Input type="date" className="glass-input" {...field} />
                       </FormControl>
@@ -144,7 +162,7 @@ export function RegistrationForm() {
                     <FormItem>
                       <FormLabel>Age</FormLabel>
                       <FormControl>
-                        <Input type="number" disabled className="glass-input bg-muted/50" {...field} />
+                        <Input type="number" disabled className="glass-input bg-muted/50" {...field} value={field.value || 0} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -156,20 +174,49 @@ export function RegistrationForm() {
                 control={form.control}
                 name="gender"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Gender</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="glass-input">
-                          <SelectValue placeholder="Select gender" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Male">Male</SelectItem>
-                        <SelectItem value="Female">Female</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <FormItem className="space-y-3">
+                    <FormLabel>Gender *</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center space-x-4">
+                        {["Male", "Female", "Other"].map((option) => (
+                          <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              className="w-4 h-4 text-primary"
+                              checked={field.value === option}
+                              onChange={() => field.onChange(option)}
+                            />
+                            <span>{option}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Status *</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center space-x-4">
+                        {["Pass", "Fail"].map((option) => (
+                          <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              className="w-4 h-4 text-primary"
+                              checked={field.value === option}
+                              onChange={() => field.onChange(option)}
+                            />
+                            <span>{option}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -179,26 +226,46 @@ export function RegistrationForm() {
                 control={form.control}
                 name="caste"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Caste / Category</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel>Caste *</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. General, OBC..." className="glass-input" {...field} />
+                      <div className="flex items-center space-x-4">
+                        {["OC", "BC", "SC", "ST"].map((option) => (
+                          <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              className="w-4 h-4 text-primary"
+                              checked={field.value === option}
+                              onChange={() => field.onChange(option)}
+                            />
+                            <span>{option}</span>
+                          </label>
+                        ))}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Education & Location */}
               <FormField
                 control={form.control}
                 name="qualification"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Highest Qualification</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. B.Tech, MBA" className="glass-input" {...field} />
-                    </FormControl>
+                    <FormLabel>Highest Qualification *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="glass-input">
+                          <SelectValue placeholder="Select qualification" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {qualifications.map(q => (
+                          <SelectItem key={q} value={q}>{q}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -209,9 +276,9 @@ export function RegistrationForm() {
                 name="passedYear"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Year of Passing</FormLabel>
+                    <FormLabel>Year of Passing *</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="2024" className="glass-input" {...field} />
+                      <Input placeholder="e.g. 2024" className="glass-input" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -223,10 +290,19 @@ export function RegistrationForm() {
                 name="district"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Home District</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Your District" className="glass-input" {...field} />
-                    </FormControl>
+                    <FormLabel>District (Andhra Pradesh) *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="glass-input">
+                          <SelectValue placeholder="Select district" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {districts.map(d => (
+                          <SelectItem key={d} value={d}>{d}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -237,67 +313,83 @@ export function RegistrationForm() {
                 name="preferredLocation"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preferred Job Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Mumbai, Remote" className="glass-input" {...field} />
-                    </FormControl>
+                    <FormLabel>Preferred Job Location *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="glass-input">
+                          <SelectValue placeholder="Select location" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {locations.map(l => (
+                          <SelectItem key={l} value={l}>{l}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            {/* Certificates Section */}
-            <div className="space-y-4 pt-4 border-t border-border/50">
-              <FormField
-                control={form.control}
-                name="hasCertificates"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 glass-input">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Do you have any additional certifications?
-                      </FormLabel>
-                      <FormDescription>
-                        Check this if you have completed any technical or vocational courses.
-                      </FormDescription>
+            <FormField
+              control={form.control}
+              name="hasCertificates"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Any Certificates? *</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center space-x-4">
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          className="w-4 h-4 text-primary"
+                          checked={field.value === true}
+                          onChange={() => field.onChange(true)}
+                        />
+                        <span>Yes</span>
+                      </label>
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          className="w-4 h-4 text-primary"
+                          checked={field.value === false}
+                          onChange={() => field.onChange(false)}
+                        />
+                        <span>No</span>
+                      </label>
                     </div>
-                  </FormItem>
-                )}
-              />
-
-              {hasCertificates && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
-                  <FormField
-                    control={form.control}
-                    name="certificateDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Certificate Details</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Describe your certifications (max 250 words)..."
-                            className="glass-input min-h-[100px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </motion.div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
+            />
+
+            {hasCertificates && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <FormField
+                  control={form.control}
+                  name="certificateDetails"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Certificate Details (Max 250 words)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Describe your certifications..."
+                          className="glass-input min-h-[100px]"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </motion.div>
+            )}
 
             <Button
               type="submit"
