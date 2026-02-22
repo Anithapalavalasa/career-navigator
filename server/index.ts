@@ -1,10 +1,6 @@
 import "dotenv/config";
-<<<<<<< HEAD
 import express, { NextFunction, type Request, Response } from "express";
 import { createServer } from "http";
-=======
-import express, { type Request, Response, NextFunction } from "express";
->>>>>>> 38d6055a0916b46742a6cca7f936041a7221c35b
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 
@@ -74,13 +70,9 @@ async function startServer() {
     });
 
     // Start listening (Windows safe)
-<<<<<<< HEAD
     const port = Number(process.env.PORT) || 3004;
-=======
-    const port = Number(process.env.PORT) || 5000;
->>>>>>> 38d6055a0916b46742a6cca7f936041a7221c35b
 
-    httpServer.listen(port, "localhost", () => {
+    httpServer.listen(port, "0.0.0.0", () => {
       log(`🚀 Server running at http://localhost:${port}`);
     });
 
