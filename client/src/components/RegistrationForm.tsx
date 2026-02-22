@@ -484,11 +484,15 @@ export function RegistrationForm() {
                         </FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="e.g. AWS Cloud Practitioner (2023), Python – Coursera (2024)"
-                            className="border-gray-300 focus:border-blue-500 min-h-[60px] text-xs resize-none"
+                            placeholder="List each certificate on a new line or separated by commas.&#10;e.g. AWS Cloud Practitioner (2023)&#10;     Python for Data Science – Coursera (2024)"
+                            className="min-h-[96px] text-xs border-gray-300 focus-visible:ring-blue-500 focus-visible:border-blue-500 leading-relaxed"
                             {...field}
+                            value={field.value ?? ""}
                           />
                         </FormControl>
+                        <p className="text-xs text-gray-400 mt-1">
+                          List certificate name, issuing body, and year for each qualification.
+                        </p>
                         <FormMessage className="text-xs" />
                       </FormItem>
                     )}

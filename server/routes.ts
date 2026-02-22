@@ -3,7 +3,11 @@ import exceljs from "exceljs";
 import type { Express } from "express";
 import type { Server } from "http";
 import { z } from "zod";
+<<<<<<< HEAD
 import { storage } from "./storage";
+=======
+import exceljs from "exceljs";
+>>>>>>> 38d6055a0916b46742a6cca7f936041a7221c35b
 
 export async function registerRoutes(
   httpServer: Server,
@@ -14,7 +18,11 @@ export async function registerRoutes(
     try {
       const input = api.admin.login.input.parse(req.body);
 
+<<<<<<< HEAD
       if (input.username === "admin" && input.password === "Admin@Carrers") {
+=======
+      if (input.username === "admin" && input.password === "admin123") {
+>>>>>>> 38d6055a0916b46742a6cca7f936041a7221c35b
         return res.json({ success: true });
       } else {
         return res.status(401).json({ message: "Invalid credentials" });
@@ -87,8 +95,11 @@ export async function registerRoutes(
         { header: "Full Name", key: "fullName", width: 30 },
         { header: "DOB", key: "dob", width: 15 },
         { header: "Age", key: "age", width: 10 },
+<<<<<<< HEAD
         {header: "Email", key: "email", width: 30 },
         {header: "Phone", key: "phone", width: 20 },
+=======
+>>>>>>> 38d6055a0916b46742a6cca7f936041a7221c35b
         { header: "Gender", key: "gender", width: 10 },
         { header: "Passed Year", key: "passedYear", width: 15 },
         { header: "Status", key: "status", width: 15 },
