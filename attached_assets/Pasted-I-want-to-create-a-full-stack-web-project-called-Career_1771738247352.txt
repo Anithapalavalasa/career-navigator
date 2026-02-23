@@ -1,0 +1,61 @@
+I want to create a full-stack web project called "Careers & Opportunities" using **HTML, CSS (glassmorphism + animations), JavaScript, Node.js, and Express**. 
+
+Requirements:
+
+1. **Home Page**:
+   - Stylish home page with animated CSS and glassmorphism design.
+   - A "Register Now" button that redirects to the registration form page.
+
+2. **Registration Form Page**:
+   - Fields:
+     - Full Name (text input)
+     - Date of Birth (date picker; when selected, automatically fill DOB field and calculate Age)
+     - Age (calculated automatically)
+     - Gender (radio buttons)
+     - Passed Year (text or dropdown)
+     - Status (Pass/Fail radio buttons)
+     - Qualification (dropdown: B.Tech, Diploma, ITI, B.Sc, B.Com, BBM, BBA, MBA-Finance, MBA-Marketing, MCA, M.Tech, B-Pharmacy, M-Pharmacy, D-Pharmacy)
+     - District (dropdown)
+     - Caste (radio buttons: OC, BC-A, BC-B, BC-C, BC-D, BC-E, SC, ST)
+     - Preferred Job Location (dropdown: Hyderabad, Vizag, Bengaluru, Chennai, Indore, Sricity, Pune)
+     - Any Certificates (radio buttons Yes/No; if Yes, show a text area limited to 250 words)
+
+   - On form submission:
+     - The data is sent to the backend.
+     - Store the data in a file/database (can use Node.js + JSON file or SQLite).
+     - Automatically update admin dashboard.
+
+3. **Admin Dashboard**:
+   - Admin login (single hardcoded credentials; no user registration required)
+   - View all registered users in a table
+   - Export all registrations as an **Excel file** (.xlsx)
+   - Simple, clean dashboard design
+
+4. **Backend**:
+   - Node.js + Express server
+   - APIs:
+     - POST /register → store user data
+     - GET /users → fetch all users for dashboard
+     - GET /download → download Excel of all users
+   - Automatically store registrations in Excel using **exceljs** npm package
+
+5. **Frontend Design**:
+   - Modern glassmorphism design with animated buttons, inputs, and cards
+   - Responsive layout
+   - Form validation for required fields
+
+6. **Extras**:
+   - When the user selects DOB, Age field is auto-calculated
+   - If “Any Certificates” is Yes, show a text box for 250-word description
+   - No authentication for users; only admin login to view/download data
+
+Please generate **full project code** including:
+
+- Folder structure (frontend + backend)
+- `package.json` with dependencies
+- Node.js server setup
+- HTML/CSS/JS frontend
+- Excel export functionality
+- Instructions to run the project on Replit
+
+Make it **ready-to-run** on Replit.
