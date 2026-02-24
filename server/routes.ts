@@ -3,7 +3,7 @@ import exceljs from "exceljs";
 import type { Express } from "express";
 import type { Server } from "http";
 import { z } from "zod";
-import { storage } from "./storage";
+import { DuplicateRegistrationError, storage } from "./storage";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -14,7 +14,7 @@ export async function registerRoutes(
     try {
       const input = api.admin.login.input.parse(req.body);
 
-      if (input.username === "admin" && input.password === "Admin@Carrers") {
+      if (input.username === "admin" && input.password === "Admin@Careers") {
         return res.json({ success: true });
       } else {
         return res.status(401).json({ message: "Invalid credentials" });
@@ -45,6 +45,14 @@ export async function registerRoutes(
       return res.status(201).json(registration);
     } catch (err) {
       console.error("REGISTRATION ERROR:", err);
+
+      if (err instanceof DuplicateRegistrationError) {
+        return res.status(409).json({
+          message: err.message,
+          field: err.field,
+          duplicate: true,
+        });
+      }
 
       if (err instanceof z.ZodError) {
         return res.status(400).json({

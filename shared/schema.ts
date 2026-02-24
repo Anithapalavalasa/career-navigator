@@ -19,8 +19,8 @@ export const registrations = pgTable("registrations", {
   age: integer("age").notNull(),
 
   gender: text("gender").notNull(), // Male, Female, Other
-  email: text("email").notNull(),
-  phone: text("phone").notNull(),
+  email: text("email").notNull().unique(),
+  phone: text("phone").notNull().unique(),
 
   passedYear: text("passed_year").notNull(),
   status: text("status").notNull(), // Pass, Fail

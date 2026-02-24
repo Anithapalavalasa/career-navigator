@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -8,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -19,10 +21,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateRegistration } from "@/hooks/use-registrations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRegistrationSchema, type InsertRegistration } from "@shared/schema";
-import { differenceInYears, parseISO } from "date-fns";
+import { differenceInYears, format, parseISO } from "date-fns";
 import { motion } from "framer-motion";
 import {
   Award,
+  CalendarIcon,
   CheckCircle2,
   GraduationCap,
   Loader2,
@@ -31,7 +34,7 @@ import {
   Send,
   User,
 } from "lucide-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation } from "wouter";
 
@@ -106,6 +109,12 @@ function SectionHeader({
 export function RegistrationForm() {
   const [, setLocation] = useLocation();
   const { mutate: register, isPending, isSuccess } = useCreateRegistration();
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
+  // DOB constraints — dynamic so they update every new year automatically
+  const currentYear = new Date().getFullYear();
+  const minDOB = new Date(1998, 0, 1);           // Jan 1, 1998
+  const maxDOB = new Date(currentYear - 5, 11, 31); // Dec 31 of (currentYear - 5)
 
   const form = useForm<InsertRegistration>({
     resolver: zodResolver(insertRegistrationSchema),
@@ -142,6 +151,33 @@ export function RegistrationForm() {
       onSuccess: () => {
         form.reset();
         setTimeout(() => setLocation("/"), 2500);
+      },
+      onError: (err: any) => {
+        // Parse the server error response
+        const body = err?.response?.data ?? err?.data ?? {};
+
+        if (body.duplicate) {
+          const field: "email" | "phone" | "both" = body.field;
+          const msg = "Already registered with this";
+
+          if (field === "email" || field === "both") {
+            form.setError("email", {
+              type: "server",
+              message: `${msg} email address.`,
+            });
+          }
+          if (field === "phone" || field === "both") {
+            form.setError("phone", {
+              type: "server",
+              message: `${msg} phone number.`,
+            });
+          }
+
+          // Scroll the first error into view
+          const firstField = field === "phone" ? "phone" : "email";
+          const el = document.querySelector(`[name="${firstField}"]`);
+          el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       },
     });
   };
@@ -244,9 +280,47 @@ export function RegistrationForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-semibold text-gray-700">Date of Birth <span className="text-red-500">*</span></FormLabel>
-                      <FormControl>
-                        <Input type="date" className="h-8 text-xs border-gray-300 focus:border-blue-500" {...field} />
-                      </FormControl>
+                      <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <button
+                              type="button"
+                              className={`flex h-8 w-full items-center justify-between rounded-md border px-3 text-xs transition-colors
+                                ${field.value
+                                  ? "border-gray-300 text-gray-700"
+                                  : "border-gray-300 text-gray-400"
+                                }
+                                bg-white hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                            >
+                              <span>
+                                {field.value
+                                  ? format(parseISO(field.value), "dd-MMM-yyyy")
+                                  : "Select date of birth"}
+                              </span>
+                              <CalendarIcon className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                            </button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            fromYear={1998}
+                            toYear={currentYear - 17}
+                            defaultMonth={
+                              field.value ? parseISO(field.value) : new Date(2000, 0, 1)
+                            }
+                            selected={field.value ? parseISO(field.value) : undefined}
+                            onSelect={(date) => {
+                              if (date) {
+                                field.onChange(format(date, "yyyy-MM-dd"));
+                                setCalendarOpen(false);
+                              }
+                            }}
+                            disabled={(date) => date < minDOB || date > maxDOB}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage className="text-xs" />
                     </FormItem>
                   )}
