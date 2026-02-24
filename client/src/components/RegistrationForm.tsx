@@ -161,7 +161,7 @@ export function RegistrationForm() {
   ];
 
   const locations = [
-    "Hyderabad", "Vizag", "Bengaluru", "Chennai", "Indore", "Sricity", "Pune",
+    "Hyderabad", "Vizag", "Bengaluru", "Chennai", "Indore", "Sricity", "Pune", "Vijayawada"
   ];
 
   // ── Success State
@@ -400,7 +400,7 @@ export function RegistrationForm() {
                   name="district"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-semibold text-gray-700">Home District (AP) <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel className="text-xs font-semibold text-gray-700">Home District (Andhra Pradesh) <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger className="h-8 text-xs border-gray-300 focus:border-blue-500">
@@ -451,7 +451,7 @@ export function RegistrationForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-semibold text-gray-700">
-                      Do you hold any certificates? <span className="text-red-500">*</span>
+                      Do you hold any certificates / Skill Course Certificates? <span className="text-red-500">*</span>
                     </FormLabel>
                     <FormControl>
                       <RadioGroup
