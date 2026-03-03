@@ -16,14 +16,14 @@ function hashPassword(password: string): string {
 function requireAdminAuth(req: Request, res: Response, next: NextFunction): void {
   const adminRole = req.headers['x-admin-role'];
   const adminUsername = req.headers['x-admin-username'];
-  
+
   if (!adminRole || !adminUsername || Array.isArray(adminRole) || Array.isArray(adminUsername)) {
-    res.status(401).json({ 
-      message: "Unauthorized. Please login first." 
+    res.status(401).json({
+      message: "Unauthorized. Please login first."
     });
     return;
   }
-  
+
   // Attach admin info to request for use in routes
   (req as any).admin = { role: String(adminRole), username: String(adminUsername) };
   next();
@@ -32,28 +32,28 @@ function requireAdminAuth(req: Request, res: Response, next: NextFunction): void
 // Middleware to check main admin only
 function requireMainAdmin(req: Request, res: Response, next: NextFunction): void {
   const adminRole = req.headers['x-admin-role'];
-  
+
   if (!adminRole || Array.isArray(adminRole) || adminRole !== "main_admin") {
-    res.status(403).json({ 
-      message: "Access denied. Only main admin can perform this action." 
+    res.status(403).json({
+      message: "Access denied. Only main admin can perform this action."
     });
     return;
   }
-  
+
   next();
 }
 
 // Middleware to check university admin or main admin
 function requireUniversityAdmin(req: Request, res: Response, next: NextFunction): void {
   const adminRole = req.headers['x-admin-role'];
-  
+
   if (!adminRole || Array.isArray(adminRole) || (adminRole !== "main_admin" && adminRole !== "university_admin")) {
-    res.status(403).json({ 
-      message: "Access denied. Only university admin or main admin can perform this action." 
+    res.status(403).json({
+      message: "Access denied. Only university admin or main admin can perform this action."
     });
     return;
   }
-  
+
   next();
 }
 
@@ -96,8 +96,8 @@ export async function registerRoutes(
         console.log("No admins found, seeding default admins...");
         try {
           await storage.createAdmin("admin", "dpo@jntugv.edu.in", "Admin@Careers2026", "main_admin");
-          await storage.createAdmin("jntugv_tpo", "tpo@jntugv.edu.in", "Uni@Careers2024", "university_admin");
-          await storage.createAdmin("nirmaan_admin", "admin@nirmaan.org", "Org@Careers2024", "organization_admin");
+          await storage.createAdmin("jntugv_tpo", "tpo@jntugv.edu.in", "Jntugv@Careers2026", "university_admin");
+          await storage.createAdmin("nirmaan_admin", "admin@nirmaan.org", "Nirmaan@2026", "organization_admin");
           console.log("Default admins seeded successfully");
         } catch (seedErr) {
           console.error("Error seeding admins:", seedErr);
@@ -106,7 +106,7 @@ export async function registerRoutes(
 
       // Get admin from database
       const admin = await storage.getAdminByUsername(input.username);
-      
+
       if (!admin || admin.passwordHash !== hashPassword(input.password)) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
@@ -117,7 +117,7 @@ export async function registerRoutes(
       }
 
       return res.json({
-        success: true, 
+        success: true,
         role: admin.role,
         username: admin.username,
       });
@@ -148,12 +148,12 @@ export async function registerRoutes(
 
       // Check if admin exists with this email
       const admin = await storage.getAdminByEmail(email);
-      
+
       // Always return success to prevent email enumeration
       // But only send email if admin exists
       if (admin) {
         const result = await storage.createPasswordResetToken(email);
-        
+
         if (result) {
           await sendPasswordResetEmail(
             admin.email,
@@ -164,9 +164,9 @@ export async function registerRoutes(
         }
       }
 
-      return res.json({ 
-        success: true, 
-        message: "If an account with that email exists, a password reset link has been sent." 
+      return res.json({
+        success: true,
+        message: "If an account with that email exists, a password reset link has been sent."
       });
     } catch (err) {
       console.error("FORGOT PASSWORD ERROR:", err);
@@ -189,19 +189,19 @@ export async function registerRoutes(
 
       // Reset password using token
       const admin = await storage.resetPassword(input.token, input.newPassword);
-      
+
       if (!admin) {
-        return res.status(400).json({ 
-          message: "Invalid or expired reset token. Please request a new password reset." 
+        return res.status(400).json({
+          message: "Invalid or expired reset token. Please request a new password reset."
         });
       }
 
       // Send confirmation email
       await sendPasswordChangedEmail(admin.email, admin.username);
 
-      return res.json({ 
-        success: true, 
-        message: "Password reset successful. You can now log in with your new password." 
+      return res.json({
+        success: true,
+        message: "Password reset successful. You can now log in with your new password."
       });
     } catch (err) {
       console.error("RESET PASSWORD ERROR:", err);
@@ -221,13 +221,13 @@ export async function registerRoutes(
   app.get(api.admin.verifyResetToken.path, async (req, res) => {
     try {
       const token = req.query.token as string;
-      
+
       if (!token) {
         return res.status(400).json({ valid: false, message: "Token is required" });
       }
 
       const admin = await storage.getAdminByResetToken(token);
-      
+
       if (!admin) {
         return res.status(400).json({ valid: false, message: "Invalid or expired token" });
       }
@@ -414,7 +414,7 @@ export async function registerRoutes(
       }
 
       const updated = await storage.updateAdmin(id, { username, email });
-      
+
       // Return without passwordHash
       return res.json({
         id: updated.id,
@@ -446,7 +446,7 @@ export async function registerRoutes(
       }
 
       const updated = await storage.updateAdmin(id, { isActive });
-      
+
       // Return without passwordHash
       return res.json({
         id: updated.id,
@@ -471,11 +471,11 @@ export async function registerRoutes(
     try {
       const idParam = req.params.id;
       const id = typeof idParam === 'string' ? parseInt(idParam) : parseInt(String(idParam));
-      
+
       // Prevent deleting self
       const adminUsername = req.headers['x-admin-username'];
       const admin = await storage.getAdminById(id);
-      
+
       if (admin && admin.username === adminUsername) {
         return res.status(400).json({ message: "You cannot delete your own account" });
       }
