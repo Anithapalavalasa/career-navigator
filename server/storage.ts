@@ -35,6 +35,20 @@ export class DuplicateRegistrationError extends Error {
   }
 }
 
+// Custom error class for duplicate admin fields
+export class DuplicateAdminError extends Error {
+  field: "email" | "username";
+  constructor(field: "email" | "username") {
+    super(
+      field === "email"
+        ? "This email is already used by another admin account."
+        : "This username is already taken by another admin account."
+    );
+    this.name = "DuplicateAdminError";
+    this.field = field;
+  }
+}
+
 // Simple hash function for passwords
 function hashPassword(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
@@ -105,9 +119,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAdmin(
-    username: string, 
-    email: string, 
-    password: string, 
+    username: string,
+    email: string,
+    password: string,
     role: "main_admin" | "university_admin" | "organization_admin"
   ): Promise<Admin> {
     const [inserted] = await db.insert(admins).values({
@@ -121,8 +135,34 @@ export class DatabaseStorage implements IStorage {
 
   async updateAdmin(id: number, data: { username?: string; email?: string; isActive?: boolean }): Promise<Admin> {
     const updateData: Partial<Admin> = {};
-    if (data.username !== undefined) updateData.username = data.username;
-    if (data.email !== undefined) updateData.email = data.email.toLowerCase();
+
+    // Check for duplicate email (excluding the current admin)
+    if (data.email !== undefined) {
+      const normalizedEmail = data.email.toLowerCase();
+      const existing = await db
+        .select({ id: admins.id })
+        .from(admins)
+        .where(eq(admins.email, normalizedEmail))
+        .limit(1);
+      if (existing.length > 0 && existing[0].id !== id) {
+        throw new DuplicateAdminError("email");
+      }
+      updateData.email = normalizedEmail;
+    }
+
+    // Check for duplicate username (excluding the current admin)
+    if (data.username !== undefined) {
+      const existing = await db
+        .select({ id: admins.id })
+        .from(admins)
+        .where(eq(admins.username, data.username))
+        .limit(1);
+      if (existing.length > 0 && existing[0].id !== id) {
+        throw new DuplicateAdminError("username");
+      }
+      updateData.username = data.username;
+    }
+
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
     const [updated] = await db
@@ -140,7 +180,7 @@ export class DatabaseStorage implements IStorage {
   async updateAdminPassword(id: number, newPassword: string): Promise<Admin> {
     const [updated] = await db
       .update(admins)
-      .set({ 
+      .set({
         passwordHash: hashPassword(newPassword),
         resetToken: null,
         resetTokenExpiry: null,
@@ -162,7 +202,7 @@ export class DatabaseStorage implements IStorage {
 
     await db
       .update(admins)
-      .set({ 
+      .set({
         resetToken: token,
         resetTokenExpiry: expiresAt,
       })
@@ -177,7 +217,7 @@ export class DatabaseStorage implements IStorage {
       .from(admins)
       .where(eq(admins.resetToken, token))
       .limit(1);
-    
+
     const admin = result[0];
     if (!admin || !admin.resetTokenExpiry) {
       return undefined;
@@ -199,7 +239,7 @@ export class DatabaseStorage implements IStorage {
 
     const [updated] = await db
       .update(admins)
-      .set({ 
+      .set({
         passwordHash: hashPassword(newPassword),
         resetToken: null,
         resetTokenExpiry: null,

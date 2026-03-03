@@ -5,7 +5,7 @@ import type { Express, NextFunction, Request, Response } from "express";
 import type { Server } from "http";
 import { z } from "zod";
 import { sendPasswordChangedEmail, sendPasswordResetEmail } from "./email";
-import { DuplicateRegistrationError, storage } from "./storage";
+import { DuplicateAdminError, DuplicateRegistrationError, storage } from "./storage";
 
 // Simple hash function for passwords
 function hashPassword(password: string): string {
@@ -426,6 +426,13 @@ export async function registerRoutes(
       });
     } catch (err) {
       console.error("UPDATE ADMIN ERROR:", err);
+
+      if (err instanceof DuplicateAdminError) {
+        return res.status(409).json({
+          message: err.message,
+          field: err.field,
+        });
+      }
 
       return res.status(500).json({
         message: "Server error",
