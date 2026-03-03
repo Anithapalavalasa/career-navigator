@@ -1,6 +1,7 @@
 import {
   boolean,
   integer,
+  pgEnum,
   pgTable,
   serial,
   text,
@@ -9,7 +10,36 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+/* ================= ADMIN ROLE ENUM ================= */
+export const adminRoleEnum = pgEnum("admin_role", [
+  "main_admin",
+  "university_admin", 
+  "organization_admin",
+]);
+
+/* ================= ADMINS TABLE ================= */
+export const admins = pgTable("admins", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: adminRoleEnum("role").notNull().default("university_admin"),
+  isActive: boolean("is_active").notNull().default(true),
+  resetToken: text("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 /* ================= DATABASE TABLE ================= */
+export const users = pgTable("users", {
+  id:serial("id").primaryKey(),
+  username:text("username").notNull(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}
+)
+
 
 export const registrations = pgTable("registrations", {
   id: serial("id").primaryKey(),
@@ -104,3 +134,6 @@ export const insertRegistrationSchema = createInsertSchema(
 
 export type Registration = typeof registrations.$inferSelect;
 export type InsertRegistration = z.infer<typeof insertRegistrationSchema>;
+export type users = typeof users.$inferSelect;
+export type Admin = typeof admins.$inferSelect;
+export type AdminRole = "main_admin" | "university_admin" | "organization_admin";

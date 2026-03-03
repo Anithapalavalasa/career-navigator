@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useDownloadExcel, useRegistrations } from "@/hooks/use-registrations";
+import { useDeleteRegistration, useDownloadExcel, useRegistrations, useUpdateRegistrationStatus } from "@/hooks/use-registrations";
 import { motion } from "framer-motion";
 import {
   ChevronRight,
@@ -19,7 +19,9 @@ import {
   LogOut,
   MapPin,
   Search,
+  Shield,
   ShieldCheck,
+  Trash2,
   Users,
 } from "lucide-react";
 import { useState } from "react";
@@ -28,8 +30,32 @@ import { useLocation } from "wouter";
 export default function AdminDashboard() {
   const { data: users, isLoading } = useRegistrations();
   const { mutate: downloadExcel, isPending: isDownloading } = useDownloadExcel();
+  const { mutate: updateStatus } = useUpdateRegistrationStatus();
+  const { mutate: deleteRegistration } = useDeleteRegistration();
   const [search, setSearch] = useState("");
   const [, setLocation] = useLocation();
+
+  // Get admin role from localStorage
+  const adminRole = typeof window !== "undefined" ? localStorage.getItem("adminRole") : null;
+  const adminUsername = typeof window !== "undefined" ? localStorage.getItem("adminUsername") : null;
+  const isMainAdmin = adminRole === "main_admin";
+  const isUniversityAdmin = adminRole === "university_admin";
+  const canUpdateStatus = isMainAdmin || isUniversityAdmin;
+  const isOrgAdmin = adminRole === "organization_admin";
+
+  // Get role display name
+  const getRoleDisplayName = (role: string | null) => {
+    switch (role) {
+      case "main_admin":
+        return "Main Admin";
+      case "university_admin":
+        return "University Admin";
+      case "organization_admin":
+        return "Organization Admin";
+      default:
+        return "Admin";
+    }
+  };
 
   const filteredUsers = users?.filter(
     (user) =>
@@ -39,7 +65,19 @@ export default function AdminDashboard() {
   );
 
   const handleLogout = () => {
+    localStorage.removeItem("adminRole");
+    localStorage.removeItem("adminUsername");
     setLocation("/");
+  };
+
+  const handleStatusChange = (id: number, newStatus: string) => {
+    updateStatus({ id, status: newStatus });
+  };
+
+  const handleDelete = (id: number) => {
+    if (window.confirm("Are you sure you want to delete this registration?")) {
+      deleteRegistration(id);
+    }
   };
 
   if (isLoading) {
@@ -96,15 +134,33 @@ export default function AdminDashboard() {
             <ChevronRight className="w-3 h-3 text-blue-400" />
             <span className="text-sm font-semibold text-white">Dashboard</span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="text-blue-300 hover:text-white hover:bg-blue-800 text-sm"
-          >
-            <LogOut className="w-4 h-4 mr-1.5" />
-            Sign Out
-          </Button>
+          <div className="flex items-center gap-4">
+            {/* Admin Management Link - Only for Main Admin */}
+            {isMainAdmin && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/admin/management")}
+                className="text-blue-300 hover:text-white hover:bg-blue-800 text-sm"
+              >
+                <Shield className="w-4 h-4 mr-1.5" />
+                Manage Admins
+              </Button>
+            )}
+            {/* Role Badge */}
+            <span className="text-xs bg-blue-800 px-2 py-1 rounded text-blue-200">
+              {getRoleDisplayName(adminRole)}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="text-blue-300 hover:text-white hover:bg-blue-800 text-sm"
+            >
+              <LogOut className="w-4 h-4 mr-1.5" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -116,23 +172,29 @@ export default function AdminDashboard() {
               <p className="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-1">
                 JNTU-GV — Careers Cell
               </p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">Admin Dashboard</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">
+                {isMainAdmin ? "Admin Dashboard" : `${getRoleDisplayName(adminRole)} Dashboard`}
+              </h1>
               <p className="text-blue-300 text-sm mt-1">
-                Manage and monitor candidate registrations
+                {isMainAdmin 
+                  ? "Manage and monitor candidate registrations" 
+                  : "View and download candidate registrations"}
               </p>
             </div>
-            <Button
-              onClick={() => downloadExcel()}
-              disabled={isDownloading}
-              className="bg-amber-500 hover:bg-amber-400 text-white border-0 font-semibold h-10 px-5 rounded-lg self-start sm:self-auto"
-            >
-              {isDownloading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <Download className="w-4 h-4 mr-2" />
-              )}
-              Export to Excel
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                onClick={() => downloadExcel()}
+                disabled={isDownloading}
+                className="bg-amber-500 hover:bg-amber-400 text-white border-0 font-semibold h-10 px-5 rounded-lg self-start sm:self-auto"
+              >
+                {isDownloading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4 mr-2" />
+                )}
+                Export to Excel
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -211,12 +273,17 @@ export default function AdminDashboard() {
                   <TableHead className="text-white font-semibold text-xs uppercase tracking-wider py-3 text-right pr-6">
                     Status
                   </TableHead>
+                  {isMainAdmin  && (
+                    <TableHead className="text-white font-semibold text-xs uppercase tracking-wider py-3 text-right pr-6">
+                      Actions
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {!filteredUsers?.length ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-16 text-gray-400">
+                    <TableCell colSpan={isMainAdmin ? 8 : 7} className="text-center py-16 text-gray-400">
                       <div className="flex flex-col items-center gap-2">
                         <Users className="w-8 h-8 text-gray-300" />
                         <p className="text-sm font-medium">No candidates found</p>
@@ -260,15 +327,43 @@ export default function AdminDashboard() {
                           : "N/A"}
                       </TableCell>
                       <TableCell className="py-3 text-right pr-6">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${user.status === "pending"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-green-100 text-green-800"
-                            }`}
-                        >
-                          {user.status === "pending" ? "⏳ Pending" : "✓ " + user.status}
-                        </span>
+                        {canUpdateStatus ? (
+                          <select
+                            aria-label="Change registration status"
+                            value={user.status}
+                            onChange={(e) => handleStatusChange(user.id, e.target.value)}
+                            className={`text-xs font-semibold px-2 py-1 rounded-full border-0 cursor-pointer ${user.status === "pending"
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-green-100 text-green-800"
+                              }`}
+                          >
+                            <option value="pending">⏳ Pending</option>
+                            <option value="approved">✓ Approved</option>
+                            <option value="rejected">✗ Rejected</option>
+                          </select>
+                        ) : (
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${user.status === "pending"
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-green-100 text-green-800"
+                              }`}
+                          >
+                            {user.status === "pending" ? "⏳ Pending" : "✓ " + user.status}
+                          </span>
+                        )}
                       </TableCell>
+                      {isMainAdmin && (
+                        <TableCell className="py-3 text-right pr-6">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(user.id)}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </motion.tr>
                   ))
                 )}

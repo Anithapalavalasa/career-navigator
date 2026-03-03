@@ -9,6 +9,9 @@ export const errorSchemas = {
   unauthorized: z.object({
     message: z.string(),
   }),
+  forbidden: z.object({
+    message: z.string(),
+  }),
   internal: z.object({
     message: z.string(),
   }),
@@ -21,8 +24,50 @@ export const api = {
       path: "/api/admin/login" as const,
       input: z.object({ username: z.string(), password: z.string() }),
       responses: {
-        200: z.object({ success: z.boolean() }),
+        200: z.object({ 
+          success: z.boolean(),
+          role: z.enum(["main_admin", "university_admin", "organization_admin"]),
+          username: z.string(),
+        }),
         401: errorSchemas.unauthorized,
+      },
+    },
+    seed: {
+      method: "POST" as const,
+      path: "/api/admin/seed" as const,
+      input: z.object({}).optional(),
+      responses: {
+        200: z.object({ success: z.boolean(), message: z.string() }),
+      },
+    },
+    forgotPassword: {
+      method: "POST" as const,
+      path: "/api/admin/forgot-password" as const,
+      input: z.object({ email: z.string().email("Please enter a valid email address") }),
+      responses: {
+        200: z.object({ success: z.boolean(), message: z.string() }),
+        400: errorSchemas.validation,
+      },
+    },
+    resetPassword: {
+      method: "POST" as const,
+      path: "/api/admin/reset-password" as const,
+      input: z.object({ 
+        token: z.string().min(1, "Reset token is required"),
+        newPassword: z.string().min(8, "Password must be at least 8 characters"),
+      }),
+      responses: {
+        200: z.object({ success: z.boolean(), message: z.string() }),
+        400: errorSchemas.validation,
+      },
+    },
+    verifyResetToken: {
+      method: "GET" as const,
+      path: "/api/admin/verify-reset-token" as const,
+      input: z.object({ token: z.string() }),
+      responses: {
+        200: z.object({ valid: z.boolean(), username: z.string().optional() }),
+        400: z.object({ valid: z.literal(false), message: z.string() }),
       },
     },
   },
@@ -48,6 +93,23 @@ export const api = {
       path: "/api/download" as const,
       responses: {
         200: z.any(), // Binary Excel file
+      },
+    },
+    updateStatus: {
+      method: "PATCH" as const,
+      path: "/api/registrations/:id/status" as const,
+      input: z.object({ status: z.string() }),
+      responses: {
+        200: z.custom<typeof registrations.$inferSelect>(),
+        403: errorSchemas.forbidden,
+      },
+    },
+    delete: {
+      method: "DELETE" as const,
+      path: "/api/registrations/:id" as const,
+      responses: {
+        200: z.object({ success: z.boolean() }),
+        403: errorSchemas.forbidden,
       },
     },
   },

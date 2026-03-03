@@ -4,8 +4,10 @@ import { Footer } from "@/layout/Footer";
 import { Header } from "@/layout/Header";
 import Home from "@/pages/Home";
 import Register from "@/pages/Register";
+import AdminResetPasswordPage from "@/pages/admin-reset-password";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminLogin from "@/pages/admin/Login";
+import AdminManagement from "@/pages/admin/admin-management";
 import NotFound from "@/pages/not-found";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Route, Switch } from "wouter";
@@ -17,7 +19,9 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/register" component={Register} />
       <Route path="/admin/login" component={AdminLogin} />
+      <Route path="/admin/reset-password" component={AdminResetPasswordPage} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/management" component={AdminManagement} />
       <Route component={NotFound} />
     </Switch>
   );
