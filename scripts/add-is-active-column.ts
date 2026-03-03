@@ -1,9 +1,10 @@
+import "dotenv/config";
 import { sql } from "drizzle-orm";
 import { db } from "../server/db";
 
 async function main() {
   console.log("Adding is_active column to admins table...");
-  
+
   try {
     // Check if column exists
     await db.execute(sql`
@@ -19,7 +20,7 @@ async function main() {
       process.exit(1);
     }
   }
-  
+
   process.exit(0);
 }
 
