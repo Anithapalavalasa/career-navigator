@@ -2,7 +2,10 @@ import { api } from "@shared/routes";
 import crypto from "crypto";
 import exceljs from "exceljs";
 import type { Express, NextFunction, Request, Response } from "express";
+import fs from "fs";
 import type { Server } from "http";
+import multer from "multer";
+import path from "path";
 import { z } from "zod";
 import { sendPasswordChangedEmail, sendPasswordResetEmail } from "./email";
 import { DuplicateAdminError, DuplicateRegistrationError, storage } from "./storage";
@@ -61,6 +64,37 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // ================= NOTIFICATION FILE UPLOAD SETUP =================
+  const uploadDir = path.resolve(process.cwd(), "client", "public", "notifications");
+
+  // Ensure the upload directory exists
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
+  const storageConfig = multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      cb(null, uploadDir);
+    },
+    filename: (_req, file, cb) => {
+      // Create a unique filename with original extension
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      cb(null, uniqueSuffix + path.extname(file.originalname));
+    },
+  });
+
+  const upload = multer({
+    storage: storageConfig,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (_req, file, cb) => {
+      if (file.mimetype === "application/pdf") {
+        cb(null, true);
+      } else {
+        cb(new Error("Only PDF files are allowed"));
+      }
+    },
+  });
+
   // ================= SEED ADMINS (for initial setup) =================
   app.post(api.admin.seed.path, async (_req, res) => {
     try {
@@ -75,7 +109,17 @@ export async function registerRoutes(
       await storage.createAdmin("jntugv_tpo", "tpo@jntugv.edu.in", "Jntugv@Careers2026", "university_admin");
       await storage.createAdmin("nirmaan_admin", "admin@nirmaan.org", "Nirmaan@2026", "organization_admin");
 
-      return res.json({ success: true, message: "Admin accounts created successfully" });
+      // Initial Notification
+      await storage.createNotification({
+        title: "Recruitment of Qualified Lab Technician for JNTU-GV CPSV (as per PCI Norms)",
+        description: "Applications are invited for the recruitment of Qualified Lab Technician for JNTU-GV CPSV. Candidates must meet PCI norms.",
+        type: "Job",
+        pdfUrl: "/notifications/jntugv_cpsv_labtechnican_recuritment 2026.pdf",
+        lastDate: "12th March 2026",
+        isActive: true,
+      });
+
+      return res.json({ success: true, message: "Admin accounts and initial notification created successfully" });
     } catch (err) {
       console.error("SEED ERROR:", err);
       return res.status(500).json({
@@ -496,6 +540,88 @@ export async function registerRoutes(
         message: "Server error",
         error: (err as Error).message,
       });
+    }
+  });
+
+  // ================= NOTIFICATIONS ROUTES =================
+
+  // GET ALL NOTIFICATIONS (Public or Admin filtered)
+  app.get(api.notifications.list.path, async (req, res) => {
+    try {
+      const activeOnly = req.query.active === 'true';
+      const data = await storage.getNotifications(activeOnly);
+      return res.json(data);
+    } catch (err) {
+      console.error("FETCH NOTIFICATIONS ERROR:", err);
+      return res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // CREATE NOTIFICATION (Admin Only)
+  app.post(api.notifications.create.path, requireAdminAuth, async (req, res) => {
+    try {
+      const input = api.notifications.create.input.parse(req.body);
+      const data = await storage.createNotification(input);
+      return res.status(201).json(data);
+    } catch (err) {
+      console.error("CREATE NOTIFICATION ERROR:", err);
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      return res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // UPDATE NOTIFICATION (Admin Only)
+  app.patch(api.notifications.update.path, requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(String(req.params.id));
+      const input = api.notifications.update.input.parse(req.body);
+      const data = await storage.updateNotification(id, input);
+      return res.json(data);
+    } catch (err) {
+      console.error("UPDATE NOTIFICATION ERROR:", err);
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      return res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // DELETE NOTIFICATION (Admin Only)
+  app.delete(api.notifications.delete.path, requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(String(req.params.id));
+      await storage.deleteNotification(id);
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("DELETE NOTIFICATION ERROR:", err);
+      return res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // UPLOAD NOTIFICATION PDF (Admin Only)
+  app.post(api.notifications.upload.path, requireAdminAuth, (req, res, next) => {
+    upload.single("file")(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({ message: `Upload error: ${err.message}` });
+      } else if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      next();
+    });
+  }, async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Return the relative path for use in the frontend
+      const fileUrl = `/notifications/${req.file.filename}`;
+      return res.json({ url: fileUrl });
+    } catch (err) {
+      console.error("UPLOAD FILE ERROR:", err);
+      return res.status(500).json({ message: "Server error during file upload" });
     }
   });
 

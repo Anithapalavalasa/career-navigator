@@ -13,7 +13,7 @@ import { z } from "zod";
 /* ================= ADMIN ROLE ENUM ================= */
 export const adminRoleEnum = pgEnum("admin_role", [
   "main_admin",
-  "university_admin", 
+  "university_admin",
   "organization_admin",
 ]);
 
@@ -32,8 +32,8 @@ export const admins = pgTable("admins", {
 
 /* ================= DATABASE TABLE ================= */
 export const users = pgTable("users", {
-  id:serial("id").primaryKey(),
-  username:text("username").notNull(),
+  id: serial("id").primaryKey(),
+  username: text("username").notNull(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -63,6 +63,19 @@ export const registrations = pgTable("registrations", {
   hasCertificates: boolean("has_certificates").notNull(),
   certificateDetails: text("certificate_details"),
 
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+/* ================= NOTIFICATIONS TABLE ================= */
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(), // Job, Vacancy, Event, News
+  pdfUrl: text("pdf_url"),
+  externalLink: text("external_link"),
+  lastDate: text("last_date"),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -130,6 +143,18 @@ export const insertRegistrationSchema = createInsertSchema(
     }
   );
 
+export const insertNotificationSchema = createInsertSchema(
+  notifications,
+  {
+    title: (schema) => schema.min(5, "Title must be at least 5 characters"),
+    description: (schema) => schema.min(10, "Description must be at least 10 characters"),
+    type: (schema) => schema.min(1, "Type is required"),
+  }
+).omit({
+  id: true,
+  createdAt: true,
+});
+
 /* ================= TYPES ================= */
 
 export type Registration = typeof registrations.$inferSelect;
@@ -137,3 +162,6 @@ export type InsertRegistration = z.infer<typeof insertRegistrationSchema>;
 export type users = typeof users.$inferSelect;
 export type Admin = typeof admins.$inferSelect;
 export type AdminRole = "main_admin" | "university_admin" | "organization_admin";
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;

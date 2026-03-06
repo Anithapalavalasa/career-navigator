@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAdminLogin, useForgotPassword, useResetPassword } from "@/hooks/use-registrations";
 import { motion } from "framer-motion";
-import { AlertCircle, ArrowLeft, CheckCircle, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
@@ -14,17 +14,20 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [view, setView] = useState<View>("login");
   const [resetToken, setResetToken] = useState(new URLSearchParams(window.location.search).get("token") || "");
-  
+
   const [, setLocation] = useLocation();
   const { mutate: login, isPending: isLoggingIn, error: loginError } = useAdminLogin();
   const { mutate: forgotPassword, isPending: isSendingReset } = useForgotPassword();
   const { mutate: resetPassword, isPending: isResetting } = useResetPassword();
-  
+
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,22 +65,22 @@ export default function AdminLogin() {
   const handleResetPassword = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
-    
+
     if (!resetToken) {
       setFormError("Invalid reset token");
       return;
     }
-    
+
     if (newPassword.length < 8) {
       setFormError("Password must be at least 8 characters");
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
       setFormError("Passwords do not match");
       return;
     }
-    
+
     resetPassword({ token: resetToken, newPassword }, {
       onSuccess: () => {
         setView("success");
@@ -112,7 +115,7 @@ export default function AdminLogin() {
           <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
             Password
           </Label>
-          <button 
+          <button
             type="button"
             onClick={() => { setView("forgot-password"); setFormError(""); }}
             className="text-xs text-blue-600 hover:text-blue-700 font-medium bg-transparent border-none cursor-pointer"
@@ -120,16 +123,29 @@ export default function AdminLogin() {
             Forgot password?
           </button>
         </div>
-        <Input
-          id="password"
-          type="password"
-          placeholder="••••••••"
-          className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          autoComplete="current-password"
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm pr-10"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+          >
+            {showPassword ? (
+              <EyeOff className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       {(formError || loginError) && (
@@ -238,16 +254,29 @@ export default function AdminLogin() {
         <Label htmlFor="newPassword" className="text-sm font-semibold text-gray-700">
           New Password
         </Label>
-        <Input
-          id="newPassword"
-          type="password"
-          placeholder="••••••••"
-          className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          required
-          minLength={8}
-        />
+        <div className="relative">
+          <Input
+            id="newPassword"
+            type={showNewPassword ? "text" : "password"}
+            placeholder="••••••••"
+            className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm pr-10"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+            minLength={8}
+          />
+          <button
+            type="button"
+            onClick={() => setShowNewPassword(!showNewPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+          >
+            {showNewPassword ? (
+              <EyeOff className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
+          </button>
+        </div>
         <p className="text-xs text-gray-500">Must be at least 8 characters</p>
       </div>
 
@@ -255,15 +284,28 @@ export default function AdminLogin() {
         <Label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700">
           Confirm New Password
         </Label>
-        <Input
-          id="confirmPassword"
-          type="password"
-          placeholder="••••••••"
-          className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
+        <div className="relative">
+          <Input
+            id="confirmPassword"
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="••••••••"
+            className="h-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm pr-10"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+          >
+            {showConfirmPassword ? (
+              <EyeOff className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
+          </button>
+        </div>
       </div>
 
       {formError && (

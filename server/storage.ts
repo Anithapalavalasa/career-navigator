@@ -1,4 +1,4 @@
-import { admins, registrations, type Admin, type InsertRegistration, type Registration } from "@shared/schema";
+import { admins, notifications, registrations, type Admin, type InsertNotification, type InsertRegistration, type Notification, type Registration } from "@shared/schema";
 import crypto from "crypto";
 import { eq, or } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
@@ -23,6 +23,12 @@ export interface IStorage {
   // Registration management (main_admin and university_admin)
   updateRegistrationStatus(id: number, status: string): Promise<Registration>;
   deleteRegistration(id: number): Promise<void>;
+  // Notification methods
+  getNotifications(activeOnly?: boolean): Promise<Notification[]>;
+  getNotificationById(id: number): Promise<Notification | undefined>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  updateNotification(id: number, data: Partial<InsertNotification>): Promise<Notification>;
+  deleteNotification(id: number): Promise<void>;
 }
 
 // Custom error class for duplicate entries
@@ -262,6 +268,41 @@ export class DatabaseStorage implements IStorage {
 
   async deleteRegistration(id: number): Promise<void> {
     await db.delete(registrations).where(eq(registrations.id, id));
+  }
+
+  // Notification implementation
+  async getNotifications(activeOnly: boolean = false): Promise<Notification[]> {
+    if (activeOnly) {
+      return await db.select().from(notifications).where(eq(notifications.isActive, true));
+    }
+    return await db.select().from(notifications);
+  }
+
+  async getNotificationById(id: number): Promise<Notification | undefined> {
+    const result = await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.id, id))
+      .limit(1);
+    return result[0];
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [inserted] = await db.insert(notifications).values(notification).returning();
+    return inserted;
+  }
+
+  async updateNotification(id: number, data: Partial<InsertNotification>): Promise<Notification> {
+    const [updated] = await db
+      .update(notifications)
+      .set(data)
+      .where(eq(notifications.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteNotification(id: number): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.id, id));
   }
 }
 

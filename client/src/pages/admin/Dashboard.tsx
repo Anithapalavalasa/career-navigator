@@ -1,3 +1,4 @@
+import { AdminNav } from "@/components/admin/AdminNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,18 +12,15 @@ import {
 import { useDeleteRegistration, useDownloadExcel, useRegistrations, useUpdateRegistrationStatus } from "@/hooks/use-registrations";
 import { motion } from "framer-motion";
 import {
-  ChevronRight,
   Clock,
   Download,
   GraduationCap,
+  LayoutDashboard,
   Loader2,
-  LogOut,
   MapPin,
   Search,
-  Shield,
-  ShieldCheck,
   Trash2,
-  Users,
+  Users
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -82,12 +80,15 @@ export default function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-3">
-        <div className="w-14 h-14 bg-blue-700 rounded-xl flex items-center justify-center">
-          <Loader2 className="w-7 h-7 animate-spin text-white" />
+      <>
+        <AdminNav />
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-3">
+          <div className="w-14 h-14 bg-blue-700 rounded-xl flex items-center justify-center">
+            <Loader2 className="w-7 h-7 animate-spin text-white" />
+          </div>
+          <p className="text-gray-500 text-sm font-medium">Loading dashboard data...</p>
         </div>
-        <p className="text-gray-500 text-sm font-medium">Loading dashboard data...</p>
-      </div>
+      </>
     );
   }
 
@@ -123,74 +124,38 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="w-full bg-gray-50 min-h-screen">
-
-      {/* ── Top Admin Bar ── */}
-      <div className="bg-blue-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-blue-300" />
-            <span className="text-sm font-medium text-blue-200">Admin Portal</span>
-            <ChevronRight className="w-3 h-3 text-blue-400" />
-            <span className="text-sm font-semibold text-white">Dashboard</span>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Admin Management Link - Only for Main Admin */}
-            {isMainAdmin && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setLocation("/admin/management")}
-                className="text-blue-300 hover:text-white hover:bg-blue-800 text-sm"
-              >
-                <Shield className="w-4 h-4 mr-1.5" />
-                Manage Admins
-              </Button>
-            )}
-            {/* Role Badge */}
-            <span className="text-xs bg-blue-800 px-2 py-1 rounded text-blue-200">
-              {getRoleDisplayName(adminRole)}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="text-blue-300 hover:text-white hover:bg-blue-800 text-sm"
-            >
-              <LogOut className="w-4 h-4 mr-1.5" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </div>
+    <div className="w-full bg-white min-h-screen">
+      <AdminNav />
 
       {/* ── Page Header ── */}
-      <div className="bg-blue-800 pb-8 pt-6">
+      <div className="bg-slate-50 border-b border-slate-200 pt-10 pb-20 shadow-inner relative z-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <p className="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-1">
-                JNTU-GV — Careers Cell
-              </p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                {isMainAdmin ? "Admin Dashboard" : `${getRoleDisplayName(adminRole)} Dashboard`}
-              </h1>
-              <p className="text-blue-300 text-sm mt-1">
-                {isMainAdmin 
-                  ? "Manage and monitor candidate registrations" 
-                  : "View and download candidate registrations"}
-              </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8">
+            <div className="flex items-center gap-6">
+              <div className="w-14 h-14 bg-blue-600/10 text-blue-700 rounded-2xl flex items-center justify-center shadow-inner">
+                <LayoutDashboard className="w-7 h-7" />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-3xl font-black text-slate-900 leading-tight tracking-tight uppercase">
+                  {isMainAdmin ? "Admin Control Center" : `${getRoleDisplayName(adminRole)} Dashboard`}
+                </h1>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1 opacity-70">
+                  {isMainAdmin
+                    ? "Central management for all candidate registrations"
+                    : "University-specific candidate oversight portal"}
+                </p>
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={() => downloadExcel()}
                 disabled={isDownloading}
-                className="bg-amber-500 hover:bg-amber-400 text-white border-0 font-semibold h-10 px-5 rounded-lg self-start sm:self-auto"
+                className="bg-amber-600 hover:bg-amber-700 text-white border-0 font-black h-12 px-8 rounded-xl shadow-lg shadow-amber-900/10 uppercase tracking-widest text-[11px] transition-all active:scale-95 group"
               >
                 {isDownloading ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
-                  <Download className="w-4 h-4 mr-2" />
+                  <Download className="w-4 h-4 mr-3 group-hover:-translate-y-0.5 transition-transform" />
                 )}
                 Export to Excel
               </Button>
@@ -200,21 +165,21 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── Stats Cards ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-5">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              className={`bg-white rounded-xl p-5 border-l-4 ${stat.border} shadow-sm`}
+              className={`bg-white rounded-2xl p-6 border-l-4 ${stat.border} shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all group`}
             >
-              <div className={`w-9 h-9 rounded-lg ${stat.color} flex items-center justify-center mb-3`}>
+              <div className={`w-12 h-12 rounded-xl ${stat.color} flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform`}>
                 {stat.icon}
               </div>
-              <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
-              <div className="text-xs font-medium text-gray-500">{stat.label}</div>
+              <div className="text-4xl font-black text-slate-900 mb-1 tracking-tight">{stat.value}</div>
+              <div className="text-[10px] font-black text-slate-400 tracking-widest uppercase">{stat.label}</div>
             </motion.div>
           ))}
         </div>
@@ -273,7 +238,7 @@ export default function AdminDashboard() {
                   <TableHead className="text-white font-semibold text-xs uppercase tracking-wider py-3 text-right pr-6">
                     Status
                   </TableHead>
-                  {isMainAdmin  && (
+                  {isMainAdmin && (
                     <TableHead className="text-white font-semibold text-xs uppercase tracking-wider py-3 text-right pr-6">
                       Actions
                     </TableHead>
@@ -333,8 +298,8 @@ export default function AdminDashboard() {
                             value={user.status}
                             onChange={(e) => handleStatusChange(user.id, e.target.value)}
                             className={`text-xs font-semibold px-2 py-1 rounded-full border-0 cursor-pointer ${user.status === "pending"
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-green-100 text-green-800"
+                              ? "bg-amber-100 text-amber-800"
+                              : "bg-green-100 text-green-800"
                               }`}
                           >
                             <option value="pending">⏳ Pending</option>
@@ -344,8 +309,8 @@ export default function AdminDashboard() {
                         ) : (
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${user.status === "pending"
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-green-100 text-green-800"
+                              ? "bg-amber-100 text-amber-800"
+                              : "bg-green-100 text-green-800"
                               }`}
                           >
                             {user.status === "pending" ? "⏳ Pending" : "✓ " + user.status}

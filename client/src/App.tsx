@@ -8,6 +8,7 @@ import AdminResetPasswordPage from "@/pages/admin-reset-password";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminLogin from "@/pages/admin/Login";
 import AdminManagement from "@/pages/admin/admin-management";
+import NotificationManagement from "@/pages/admin/notification-management";
 import NotFound from "@/pages/not-found";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Route, Switch } from "wouter";
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/admin/reset-password" component={AdminResetPasswordPage} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/management" component={AdminManagement} />
+      <Route path="/admin/notifications" component={NotificationManagement} />
       <Route component={NotFound} />
     </Switch>
   );

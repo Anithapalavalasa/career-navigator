@@ -1,15 +1,19 @@
 import { Button } from "@/components/ui/button";
+import { useNotifications } from "@/hooks/use-notifications";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
   Award,
+  Bell,
   BookOpen,
   Briefcase,
   Building2,
   CheckCircle,
   ChevronRight,
+  ExternalLink,
   FileText,
   GraduationCap,
+  Loader2,
   ShieldCheck,
   UserPlus,
   Users,
@@ -65,6 +69,109 @@ const STATS = [
   { value: "60%", label: "Placement Rate", icon: <Award className="h-5 w-5" /> },
   { value: "4", label: "Districts Covered", icon: <BookOpen className="h-5 w-5" /> },
 ];
+
+function NotificationsList() {
+  const { data: notifications, isLoading } = useNotifications(true);
+
+  if (isLoading) {
+    return (
+      <div className="col-span-full py-12 flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+        <p className="text-gray-400 text-sm font-medium">Checking for latest updates...</p>
+      </div>
+    );
+  }
+
+  if (!notifications?.length) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="col-span-full bg-gray-50 border border-gray-100 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center opacity-80"
+      >
+        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+          <Bell className="w-8 h-8 text-gray-300" />
+        </div>
+        <h3 className="text-lg font-bold text-gray-900 mb-2">Internal Career Portal Updates</h3>
+        <p className="text-gray-500 text-sm max-w-sm">No active recruitment notifications at this moment. Please check back later for job alerts and vacancies.</p>
+      </motion.div>
+    );
+  }
+
+  return (
+    <>
+      {notifications.map((notif, i) => (
+        <motion.div
+          key={notif.id}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: i * 0.1 }}
+          className="bg-white border border-gray-100 rounded-2xl p-6 relative group hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 flex flex-col h-full"
+        >
+          <div className="absolute top-4 right-4">
+            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${notif.type === 'Job' ? 'bg-amber-100 text-amber-700' :
+              notif.type === 'Vacancy' ? 'bg-green-100 text-green-700' :
+                'bg-blue-100 text-blue-700'
+              }`}>
+              {notif.type}
+            </span>
+          </div>
+
+          <div className="mb-4">
+            <h3 className="text-lg font-extrabold text-gray-900 mb-2 leading-tight group-hover:text-blue-700 transition-colors">
+              {notif.title}
+            </h3>
+            <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">
+              {notif.description}
+            </p>
+          </div>
+
+          <div className="mt-auto">
+            <div className="flex flex-wrap gap-4 mb-5 border-t border-gray-50 pt-4">
+              {notif.lastDate && (
+                <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  Date: <span className="text-gray-900">{notif.lastDate}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              {notif.pdfUrl && (
+                <Button
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-0 text-xs h-9 flex-1 rounded-lg flex items-center gap-2"
+                  onClick={() => window.open(notif.pdfUrl || "", '_blank')}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  Details
+                </Button>
+              )}
+              {notif.externalLink ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-gray-200 text-gray-700 hover:bg-gray-50 text-xs h-9 flex-1 rounded-lg flex items-center gap-2"
+                  onClick={() => window.open(notif.externalLink || "", '_blank')}
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Apply
+                </Button>
+              ) : (
+                <Link href="/register" className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full border-blue-100 text-blue-600 hover:bg-blue-50 text-xs h-9 rounded-lg">
+                    Register
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </>
+  );
+}
 
 export default function Home() {
   return (
@@ -181,9 +288,35 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════
+          LATEST NOTIFICATIONS
+          ══════════════════════════════════ */}
+      <section className="py-12 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="flex-shrink-0 w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center shadow-lg shadow-amber-200">
+              <motion.div
+                animate={{ rotate: [0, 15, -15, 0] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+              >
+                <div className="text-white">🔔</div>
+              </motion.div>
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Latest Notifications</h2>
+              <div className="h-1 w-12 bg-amber-500 rounded-full mt-1" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <NotificationsList />
+          </div>
+        </div >
+      </section >
+
+      {/* ══════════════════════════════════
           FEATURES
           ══════════════════════════════════ */}
-      <section className="bg-gray-50 py-14 sm:py-20">
+      < section className="bg-gray-50 py-14 sm:py-20" >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -220,12 +353,12 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* ══════════════════════════════════
           HOW IT WORKS
           ══════════════════════════════════ */}
-      <section className="bg-white py-14 sm:py-20">
+      < section className="bg-white py-14 sm:py-20" >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -264,12 +397,13 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* ══════════════════════════════════
           CTA BANNER
           ══════════════════════════════════ */}
-      <section className="py-14 sm:py-16" style={{ background: "linear-gradient(135deg, #0f2a5e 0%, #1e4db7 100%)" }}>
+      < section className="py-14 sm:py-16" style={{ background: "linear-gradient(135deg, #0f2a5e 0%, #1e4db7 100%)" }
+      }>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -296,12 +430,12 @@ export default function Home() {
             </Link>
           </motion.div>
         </div>
-      </section>
+      </section >
 
       {/* ══════════════════════════════════
           ELIGIBILITY
           ══════════════════════════════════ */}
-      <section className="bg-gray-50 py-14 sm:py-16">
+      < section className="bg-gray-50 py-14 sm:py-16" >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             <motion.div
@@ -356,8 +490,8 @@ export default function Home() {
             </motion.div>
           </div>
         </div>
-      </section>
+      </section >
 
-    </div>
+    </div >
   );
 }

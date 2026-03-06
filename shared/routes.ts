@@ -24,7 +24,7 @@ export const api = {
       path: "/api/admin/login" as const,
       input: z.object({ username: z.string(), password: z.string() }),
       responses: {
-        200: z.object({ 
+        200: z.object({
           success: z.boolean(),
           role: z.enum(["main_admin", "university_admin", "organization_admin"]),
           username: z.string(),
@@ -52,7 +52,7 @@ export const api = {
     resetPassword: {
       method: "POST" as const,
       path: "/api/admin/reset-password" as const,
-      input: z.object({ 
+      input: z.object({
         token: z.string().min(1, "Reset token is required"),
         newPassword: z.string().min(8, "Password must be at least 8 characters"),
       }),
@@ -109,6 +109,52 @@ export const api = {
       path: "/api/registrations/:id" as const,
       responses: {
         200: z.object({ success: z.boolean() }),
+        403: errorSchemas.forbidden,
+      },
+    },
+  },
+  notifications: {
+    list: {
+      method: "GET" as const,
+      path: "/api/notifications" as const,
+      responses: {
+        200: z.array(z.custom<import("./schema").Notification>()),
+      },
+    },
+    create: {
+      method: "POST" as const,
+      path: "/api/notifications" as const,
+      input: z.custom<import("./schema").InsertNotification>(),
+      responses: {
+        201: z.custom<import("./schema").Notification>(),
+        400: errorSchemas.validation,
+        403: errorSchemas.forbidden,
+      },
+    },
+    update: {
+      method: "PATCH" as const,
+      path: "/api/notifications/:id" as const,
+      input: z.custom<Partial<import("./schema").InsertNotification>>(),
+      responses: {
+        200: z.custom<import("./schema").Notification>(),
+        400: errorSchemas.validation,
+        403: errorSchemas.forbidden,
+      },
+    },
+    delete: {
+      method: "DELETE" as const,
+      path: "/api/notifications/:id" as const,
+      responses: {
+        200: z.object({ success: z.boolean() }),
+        403: errorSchemas.forbidden,
+      },
+    },
+    upload: {
+      method: "POST" as const,
+      path: "/api/notifications/upload" as const,
+      responses: {
+        200: z.object({ url: z.string() }),
+        400: errorSchemas.validation,
         403: errorSchemas.forbidden,
       },
     },

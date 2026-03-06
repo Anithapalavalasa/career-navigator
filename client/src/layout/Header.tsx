@@ -43,7 +43,7 @@ export const Header: React.FC = () => {
                   <span className="sm:hidden">Gurajada Vizianagram</span>
                   <span className="hidden sm:inline">Gurajada Vizianagram (JNTU-GV)</span>
                 </p>
-                <p className="text-xs text-gray-400 hidden lg:block">An Autonomous University · Est. 2023</p>
+                <p className="text-xs text-gray-400 hidden lg:block">A Govt. University · Est. 2022</p>
               </div>
             </div>
 
