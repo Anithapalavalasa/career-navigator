@@ -132,7 +132,7 @@ function NotificationsList() {
               {notif.lastDate && (
                 <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
                   <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  Date: <span className="text-gray-900">{notif.lastDate}</span>
+                  Last Date for Application: <span className="text-gray-900">{notif.lastDate}</span>
                 </div>
               )}
             </div>
