@@ -158,13 +158,7 @@ function NotificationsList() {
                   <ExternalLink className="w-3.5 h-3.5" />
                   Apply
                 </Button>
-              ) : (
-                <Link href="/register" className="flex-1">
-                  <Button variant="outline" size="sm" className="w-full border-blue-100 text-blue-600 hover:bg-blue-50 text-xs h-9 rounded-lg">
-                    Register
-                  </Button>
-                </Link>
-              )}
+              ) : ""}
             </div>
           </div>
         </motion.div>
